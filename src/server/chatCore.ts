@@ -67,7 +67,7 @@ export async function askClaude(opts: {
       max_tokens: opts.maxTokens ?? 4000,
       system: opts.system,
       messages: opts.messages,
-      ...(opts.noThinking ? { thinking: { type: 'disabled' } } : {}),
+      ...(opts.noThinking ? { thinking: { type: 'between_tools' } } : {}),
     }),
   })
   if (!res.ok) {
