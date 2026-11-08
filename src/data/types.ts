@@ -32,6 +32,10 @@ export interface Aspect {
 export interface Position {
   id: PositionId
   name: string
+  /** Короткий ключ позиції (кілька слів) */
+  key: string
+  /** Пояснення простими словами (1–2 речення) */
+  simple: string
   block: string
   strength: 'Сильна' | 'Слабка'
   conscious: boolean

@@ -38,7 +38,10 @@ describe('основний сценарій', () => {
     expect(screen.getByText('Основні особливості мислення')).toBeTruthy()
 
     await user.click(screen.getByRole('tab', { name: 'Модель А (довідково)' }))
-    expect(screen.getAllByRole('row').length).toBe(1 + 8 + 1) // шапка + 8 позицій + розгорнутий опис
+    expect(screen.getAllByRole('row').length).toBe(1 + 8) // шапка + 8 позицій
+    expect(screen.getByText('Моя головна сила')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Ne' }))
+    expect(screen.getAllByRole('row').length).toBe(1 + 8 + 1)
     await user.click(screen.getByRole('button', { name: /Показати функцію за Калінаускасом/ }))
     // IEE: базова Ne → функція 1 за Калінаускасом
     expect(screen.getByText('Функція організації', { selector: 'div' })).toBeTruthy()

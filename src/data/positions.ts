@@ -9,6 +9,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   1: {
     id: 1,
     name: 'Базова',
+    key: 'Моя головна сила',
+    simple: 'Головна сильна сторона. Людина тут впевнена й може говорити про це довго.',
     block: 'Блок Его',
     strength: 'Сильна',
     conscious: true,
@@ -21,6 +23,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   2: {
     id: 2,
     name: 'Творча',
+    key: 'Так я це роблю',
+    simple: 'Допомагає втілити ідею в справу. Виходить легко й гнучко.',
     block: 'Блок Его',
     strength: 'Сильна',
     conscious: true,
@@ -33,6 +37,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   3: {
     id: 3,
     name: 'Рольова',
+    key: 'Граю роль, коли треба',
+    simple: 'Слабка, але людина розуміє, чого від неї хочуть. Може зіграти роль, проте швидко втомлюється.',
     block: 'Блок Суперего',
     strength: 'Слабка',
     conscious: true,
@@ -45,6 +51,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   4: {
     id: 4,
     name: 'Больова',
+    key: 'Тут мені найболючіше',
+    simple: 'Слабка, і людина сама бачить свої помилки. Критика тут ранить.',
     block: 'Блок Суперего',
     strength: 'Слабка',
     conscious: true,
@@ -57,6 +65,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   5: {
     id: 5,
     name: 'Сугестивна',
+    key: 'Хочу, щоб допомогли',
+    simple: 'Слабка. Людині цього бракує, тому вона дуже вдячна за допомогу.',
     block: 'Блок Суперід',
     strength: 'Слабка',
     conscious: false,
@@ -69,6 +79,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   6: {
     id: 6,
     name: 'Активаційна',
+    key: 'Вмикаюсь від підштовхування',
+    simple: 'Слабка. Вмикається, коли хтось запрошує, підтримує чи надихає.',
     block: 'Блок Суперід',
     strength: 'Слабка',
     conscious: false,
@@ -81,6 +93,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   7: {
     id: 7,
     name: 'Обмежувальна',
+    key: 'Можу, але не хочу',
+    simple: 'Сильна, але людині це нецікаво. Користується коротко, коли треба.',
     block: 'Блок Ід',
     strength: 'Сильна',
     conscious: false,
@@ -93,6 +107,8 @@ export const POSITIONS: Record<PositionId, Position> = {
   8: {
     id: 8,
     name: 'Фонова',
+    key: 'Виходить саме собою',
+    simple: 'Сильна й працює сама, у фоні. Людина цього навіть не помічає.',
     block: 'Блок Ід',
     strength: 'Сильна',
     conscious: false,
