@@ -78,7 +78,7 @@ export async function checkRate(kv: KV | undefined, ip: string, limit: number, n
   return true
 }
 
-export const EVENT_NAMES = ['tab', 'pick_type', 'function', 'analyze', 'chat', 'theses'] as const
+export const EVENT_NAMES = ['tab', 'pick_type', 'function', 'analyze', 'chat', 'theses', 'ack'] as const
 export type EventName = (typeof EVENT_NAMES)[number]
 
 export function sanitizeEvent(x: unknown): { name: EventName; props: Record<string, string> } | null {
@@ -109,4 +109,11 @@ export function aggregate(events: { name: string; props: Record<string, string> 
     bucket[label] = (bucket[label] ?? 0) + 1
   }
   return out
+}
+
+/** Односторонній хеш IP із сіллю: у сховищі зберігається не адреса, а її відбиток. */
+export async function hashIp(ip: string, salt: string): Promise<string> {
+  const data = new TextEncoder().encode(`${salt}:${ip}`)
+  const buf = await crypto.subtle.digest('SHA-256', data)
+  return [...new Uint8Array(buf)].slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('')
 }

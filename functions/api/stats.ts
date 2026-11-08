@@ -20,7 +20,14 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: { 
     }
     cursor = page.list_complete ? undefined : page.cursor
   } while (cursor && ++pages < 5)
-  return new Response(JSON.stringify({ total: events.length, byEvent: aggregate(events) }, null, 2), {
+  const acks: { t: string; v: number }[] = []
+  const list = await env.USAGE.list({ prefix: 'ack:', limit: 1000 })
+  for (const k of list.keys) {
+    const v = await env.USAGE.get(k.name)
+    if (v) acks.push(JSON.parse(v))
+  }
+  acks.sort((a, b) => a.t.localeCompare(b.t))
+  return new Response(JSON.stringify({ total: events.length, byEvent: aggregate(events), disclaimer: { acknowledgedDevices: acks.length, first: acks[0]?.t ?? null, last: acks[acks.length - 1]?.t ?? null, log: acks.slice(-50) } }, null, 2), {
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
   })
 }

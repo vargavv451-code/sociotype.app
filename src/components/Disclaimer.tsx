@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const KEY = 'socio-ack-v1'
 
@@ -15,8 +15,34 @@ function wasAcknowledged(): boolean {
 
 /** Повноекранне попередження при першому відкритті: або вийти, або підтвердити, що ознайомлені. */
 export function DisclaimerGate() {
-  const [ack, setAck] = useState<boolean>(wasAcknowledged)
-  if (ack) return null
+  const [state, setState] = useState<'checking' | 'show' | 'hidden'>(() => (wasAcknowledged() ? 'hidden' : 'checking'))
+
+  // Якщо на цьому пристрої підтвердження немає, перевіряємо на сервері: з тієї ж адреси його могли дати з іншого браузера чи з іконки на екрані.
+  useEffect(() => {
+    if (state !== 'checking') return
+    const ctrl = new AbortController()
+    const timer = window.setTimeout(() => ctrl.abort(), 2500)
+    fetch('/api/ack', { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : { acked: false }))
+      .then((d: { acked?: boolean }) => {
+        if (d.acked) {
+          try {
+            localStorage.setItem(KEY, '1')
+          } catch {
+            /* ігноруємо */
+          }
+          setState('hidden')
+        } else setState('show')
+      })
+      .catch(() => setState('show'))
+      .finally(() => window.clearTimeout(timer))
+    return () => {
+      ctrl.abort()
+      window.clearTimeout(timer)
+    }
+  }, [state])
+
+  if (state !== 'show') return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 p-4" role="dialog" aria-modal="true" aria-labelledby="disc-title">
       <div className="max-h-full w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-2xl dark:bg-stone-800">
@@ -34,7 +60,12 @@ export function DisclaimerGate() {
               } catch {
                 /* сховище недоступне — попередження покажеться знову */
               }
-              setAck(true)
+              try {
+                void fetch('/api/ack', { method: 'POST', keepalive: true }).catch(() => {})
+              } catch {
+                /* ігноруємо */
+              }
+              setState('hidden')
             }}
             className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
           >
