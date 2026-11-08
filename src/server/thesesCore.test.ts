@@ -27,9 +27,13 @@ describe('buildThesesUser', () => {
 })
 
 describe('parseTheses', () => {
-  const ten = Array.from({ length: 10 }, (_, i) => `Теза номер ${i + 1} у контексті`)
+  const words = ['Вона','Лист','Пауза','Колега','Стіл','Чому','Команда','Він','Наприкінці','Двері']
+  const ten = words.map((w, i) => `${w} номер ${i + 1} у контексті`)
   it('читає масив навіть у тексті навколо', () => {
     expect(parseTheses('Ось:\n' + JSON.stringify(ten))).toEqual(ten)
+  })
+  it('відхиляє тези з однаковими початками', () => {
+    expect(parseTheses(JSON.stringify(Array.from({ length: 10 }, (_, i) => `Сказати щось номер ${i}`)))).toBeNull()
   })
   it('відхиляє неправильну кількість, дублікати й не-рядки', () => {
     expect(parseTheses(JSON.stringify(ten.slice(0, 9)))).toBeNull()

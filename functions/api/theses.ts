@@ -40,13 +40,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   }
 
   try {
-    const text = await askClaude({
-      apiKey: env.ANTHROPIC_API_KEY,
-      model: env.CHAT_MODEL || 'claude-sonnet-5-5',
-      system: THESES_SYSTEM,
-      messages: [{ role: 'user', content: buildThesesUser(req) }],
-    })
-    const theses = parseTheses(text)
+    let theses: string[] | null = null
+    for (let attempt = 0; attempt < 2 && !theses; attempt++) {
+      const text = await askClaude({
+        apiKey: env.ANTHROPIC_API_KEY,
+        model: env.CHAT_MODEL || 'claude-sonnet-5-5',
+        system: THESES_SYSTEM,
+        messages: [{ role: 'user', content: buildThesesUser(req) }],
+      })
+      theses = parseTheses(text)
+    }
     if (!theses) return json({ error: 'Не вдалося сформувати тези' }, 502)
     if (env.USAGE) await env.USAGE.put(key, JSON.stringify(theses), { expirationTtl: 60 * 60 * 24 * 365 })
     await logEvent(env.USAGE, 'theses', { aspect: req.aspect, fn: String(req.fn), ctx: req.context })
