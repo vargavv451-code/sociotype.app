@@ -121,7 +121,7 @@ export default function App() {
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-900 dark:text-stone-100">
       <DisclaimerGate />
       <DisclaimerBar />
-      <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/90 backdrop-blur dark:border-stone-700 dark:bg-stone-900/90">
+      <header className="z-30 sm:sticky sm:top-0 border-b border-stone-200 bg-white/90 backdrop-blur dark:border-stone-700 dark:bg-stone-900/90">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-3">
           <Header dark={dark} onToggleTheme={() => setDark((d) => !d)} onPick={(c) => pickType(c)} />
           <nav aria-label="Розділи">
