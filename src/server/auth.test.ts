@@ -76,6 +76,31 @@ describe('/api/auth і /api/saved', () => {
   })
 })
 
+describe('основний тип на сервері', () => {
+  it('зберігається, не стирається при PUT без main, очищається null, невідомий код відкидається', async () => {
+    const env = { USAGE: memKV() }
+    const { token } = await (await auth({ request: post({ action: 'register', login: 'maintest', password: 'password1' }), env })).json()
+    const put = (body: unknown) => savedPut({ request: new Request('https://x/api/saved', { method: 'PUT', headers: { authorization: `Bearer ${token}` }, body: JSON.stringify(body) }), env })
+    const get = async () => (await savedGet({ request: new Request('https://x/api/saved', { headers: { authorization: `Bearer ${token}` } }), env })).json()
+    await put({ items: [], main: 'IEE' })
+    expect((await get()).main).toBe('IEE')
+    await put({ items: [{ code: 'LII', note: '', at: 1 }] })
+    expect((await get()).main).toBe('IEE')
+    await put({ items: [], main: 'XXX' })
+    expect((await get()).main).toBeNull()
+    await put({ items: [], main: 'ILE' })
+    await put({ items: [], main: null })
+    expect((await get()).main).toBeNull()
+  })
+  it('старий формат (масив) читається', async () => {
+    const kv = memKV()
+    kv.data.set('sess:' + 'a'.repeat(64), 'old')
+    kv.data.set('saved:old', JSON.stringify([{ code: 'IEE', note: 'x', at: 1 }]))
+    const r = await savedGet({ request: new Request('https://x/api/saved', { headers: { authorization: 'Bearer ' + 'a'.repeat(64) } }), env: { USAGE: kv } })
+    expect(await r.json()).toMatchObject({ items: [{ code: 'IEE' }], main: null })
+  })
+})
+
 describe('mergeSaved', () => {
   it('поєднує списки й зберігає непорожню нотатку', () => {
     const m = mergeSaved(

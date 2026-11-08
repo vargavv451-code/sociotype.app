@@ -7,6 +7,7 @@ import { DichotomyPicker } from './components/DichotomyPicker'
 import { Header } from './components/Header'
 import { ModelAView } from './components/ModelAView'
 import { ProfileView } from './components/ProfileView'
+import { CompareView } from './components/CompareView'
 import { SavedView } from './components/SavedView'
 import { useSaved } from './lib/saved'
 import { KalinauskasView } from './components/KalinauskasView'
@@ -23,6 +24,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'profile', label: 'Профіль' },
   { id: 'triggers', label: 'Функції й реакції' },
   { id: 'comm', label: 'Комунікація' },
+  { id: 'compare', label: 'Порівняння' },
   { id: 'saved', label: 'Збережені' },
   { id: 'model', label: 'Модель А (довідково)' },
   { id: 'about', label: 'Про довідник' },
@@ -192,6 +194,14 @@ export default function App() {
             onTypeChange={(c) => setDich({ ...SOCIOTYPES[c].dichotomies })}
             fn={fn}
             onFnChange={setFn}
+          />
+        )}
+        {tab === 'compare' && (
+          <CompareView
+            main={saved.main}
+            onMain={saved.setMain}
+            other={type?.code ?? null}
+            onOther={(c) => setDich({ ...SOCIOTYPES[c].dichotomies })}
           />
         )}
         {tab === 'saved' && (

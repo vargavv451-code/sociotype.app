@@ -39,3 +39,8 @@ export function mergeSaved(local: SavedItem[], server: SavedItem[]): SavedItem[]
   }
   return [...map.values()].sort((a, b) => b.at - a.at)
 }
+
+/** Основний соціотип профілю: один код або null. */
+export function parseMain(x: unknown): TypeCode | null {
+  return typeof x === 'string' && (TYPE_CODES as string[]).includes(x) ? (x as TypeCode) : null
+}

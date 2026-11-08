@@ -1,11 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TypeCode } from '../data/types'
 import { AuthError, authenticate, fetchSaved, loadAccount, logoutRemote, pushSaved, storeAccount, type Account } from './account'
-import { MAX_NOTE, mergeSaved, parseSaved, type SavedItem } from './savedCore'
+import { MAX_NOTE, mergeSaved, parseMain, parseSaved, type SavedItem } from './savedCore'
 
 export { parseSaved, mergeSaved, type SavedItem } from './savedCore'
 
 const KEY = 'socio-saved'
+const MAIN_KEY = 'socio-main'
+
+function loadMain(): TypeCode | null {
+  try {
+    return parseMain(localStorage.getItem(MAIN_KEY))
+  } catch {
+    return null
+  }
+}
+
+function storeMain(c: TypeCode | null) {
+  try {
+    if (c) localStorage.setItem(MAIN_KEY, c)
+    else localStorage.removeItem(MAIN_KEY)
+  } catch {
+    /* ігноруємо */
+  }
+}
 
 function load(): SavedItem[] {
   try {
@@ -32,6 +50,9 @@ export type SyncStatus = 'local' | 'syncing' | 'synced' | 'error'
  */
 export function useSaved() {
   const [items, setItems] = useState<SavedItem[]>(load)
+  const [main, setMainState] = useState<TypeCode | null>(loadMain)
+  const mainRef = useRef(main)
+  mainRef.current = main
   const [account, setAccount] = useState<Account | null>(loadAccount)
   const [status, setStatus] = useState<SyncStatus>(account ? 'syncing' : 'local')
   const [error, setError] = useState('')
@@ -54,11 +75,14 @@ export function useSaved() {
     void (async () => {
       try {
         const server = await fetchSaved(account.token)
-        const merged = mergeSaved(load(), server)
+        const merged = mergeSaved(load(), server.items)
+        const mergedMain = server.main ?? loadMain() // серверне значення в пріоритеті
         if (!alive) return
         store(merged)
         setItems(merged)
-        await pushSaved(account.token, merged)
+        storeMain(mergedMain)
+        setMainState(mergedMain)
+        await pushSaved(account.token, merged, mergedMain)
         if (!alive) return
         ready.current = true
         setStatus('synced')
@@ -77,12 +101,12 @@ export function useSaved() {
     return () => { alive = false }
   }, [account, signOutLocal])
 
-  const schedulePush = useCallback((next: SavedItem[]) => {
+  const schedulePush = useCallback((next: SavedItem[], nextMain: TypeCode | null) => {
     if (!account || !ready.current) return
     setStatus('syncing')
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(() => {
-      pushSaved(account.token, next).then(
+      pushSaved(account.token, next, nextMain).then(
         () => { setStatus('synced'); setError('') },
         (e) => {
           if (e instanceof AuthError) { signOutLocal(); setError(e.message) }
@@ -98,10 +122,19 @@ export function useSaved() {
     setItems((prev) => {
       const next = fn(prev)
       store(next)
-      schedulePush(next)
+      schedulePush(next, mainRef.current)
       return next
     })
   }, [schedulePush])
+
+  const itemsRef = useRef(items)
+  itemsRef.current = items
+  const setMain = (c: TypeCode | null) => {
+    storeMain(c)
+    setMainState(c)
+    mainRef.current = c
+    schedulePush(itemsRef.current, c)
+  }
 
   const isSaved = (c: TypeCode) => items.some((i) => i.code === c)
   const toggle = (c: TypeCode) =>
@@ -121,5 +154,5 @@ export function useSaved() {
     signOutLocal()
   }
 
-  return { items, isSaved, toggle, remove, setNote, account, status, error, signIn, signOut }
+  return { items, main, setMain, isSaved, toggle, remove, setNote, account, status, error, signIn, signOut }
 }

@@ -1,4 +1,5 @@
-import { parseSaved, type SavedItem } from './savedCore'
+import type { TypeCode } from '../data/types'
+import { parseMain, parseSaved, type SavedItem } from './savedCore'
 
 const KEY = 'socio-account'
 
@@ -60,15 +61,21 @@ export async function logoutRemote(token: string) {
   }
 }
 
-export async function fetchSaved(token: string): Promise<SavedItem[]> {
+export interface SavedData {
+  items: SavedItem[]
+  main: TypeCode | null
+}
+
+export async function fetchSaved(token: string): Promise<SavedData> {
   const res = await call('/api/saved', { headers: jsonHeaders(token) })
   if (res.status === 401) throw new AuthError('Сесія закінчилась. Увійдіть знову')
   if (!res.ok) throw new Error('Не вдалося завантажити список')
-  return parseSaved((await res.json()).items)
+  const d = await res.json()
+  return { items: parseSaved(d.items), main: parseMain(d.main) }
 }
 
-export async function pushSaved(token: string, items: SavedItem[]): Promise<void> {
-  const res = await call('/api/saved', { method: 'PUT', headers: jsonHeaders(token), body: JSON.stringify({ items }) })
+export async function pushSaved(token: string, items: SavedItem[], main: TypeCode | null): Promise<void> {
+  const res = await call('/api/saved', { method: 'PUT', headers: jsonHeaders(token), body: JSON.stringify({ items, main }) })
   if (res.status === 401) throw new AuthError('Сесія закінчилась. Увійдіть знову')
   if (!res.ok) throw new Error('Не вдалося зберегти на сервері')
 }
