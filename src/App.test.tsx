@@ -140,7 +140,7 @@ describe('дані за Калінаускасом', () => {
     render(<App />)
     await user.type(screen.getByLabelText('Пошук за соціотипом'), 'IEE')
     await user.click(await screen.findByRole('button', { name: /IEE.*Гекслі/ }))
-    for (const name of ['Профіль', 'Функції й реакції', 'Комунікація', 'Модель А (довідково)', 'Про довідник']) {
+    for (const name of ['Профіль', 'Функції й реакції', 'Аспекти', 'Комунікація', 'Модель А (довідково)', 'Про довідник']) {
       await user.click(screen.getByRole('tab', { name }))
       const tags = document.querySelectorAll('[data-source]')
       expect(tags.length, name).toBeGreaterThan(0)

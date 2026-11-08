@@ -7,6 +7,7 @@ import { DichotomyPicker } from './components/DichotomyPicker'
 import { Header } from './components/Header'
 import { ModelAView } from './components/ModelAView'
 import { ProfileView } from './components/ProfileView'
+import { AspectsView } from './components/AspectsView'
 import { CompareView } from './components/CompareView'
 import { SavedView } from './components/SavedView'
 import { useSaved } from './lib/saved'
@@ -23,6 +24,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'pick', label: 'Соціотип' },
   { id: 'profile', label: 'Профіль' },
   { id: 'triggers', label: 'Функції й реакції' },
+  { id: 'aspects', label: 'Аспекти' },
   { id: 'comm', label: 'Комунікація' },
   { id: 'compare', label: 'Порівняння' },
   { id: 'saved', label: 'Збережені' },
@@ -196,6 +198,7 @@ export default function App() {
             onFnChange={setFn}
           />
         )}
+        {tab === 'aspects' && <AspectsView onPick={(c) => pickType(c)} />}
         {tab === 'compare' && (
           <CompareView
             main={saved.main}
