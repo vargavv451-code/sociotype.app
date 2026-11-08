@@ -50,11 +50,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       })
       theses = parseTheses(text)
     }
-    if (!theses) return json({ error: 'Не вдалося сформувати тези' }, 502)
-    if (env.USAGE) await env.USAGE.put(key, JSON.stringify(theses), { expirationTtl: 60 * 60 * 24 * 365 })
-    await logEvent(env.USAGE, 'theses', { aspect: req.aspect, fn: String(req.fn), ctx: req.context })
+    if (!theses) return json({ error: 'Не вдалося сформувати тези (відповідь моделі не пройшла перевірку)' }, 502)
+    try {
+      if (env.USAGE) await env.USAGE.put(key, JSON.stringify(theses), { expirationTtl: 60 * 60 * 24 * 365 })
+      await logEvent(env.USAGE, 'theses', { aspect: req.aspect, fn: String(req.fn), ctx: req.context })
+    } catch {
+      /* кеш чи статистика недоступні — тези все одно віддаємо */
+    }
     return json({ theses, cached: false })
-  } catch {
-    return json({ error: 'Не вдалося отримати тези' }, 502)
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : 'невідома помилка'
+    return json({ error: `Не вдалося отримати тези (${reason})` }, 502)
   }
 }
