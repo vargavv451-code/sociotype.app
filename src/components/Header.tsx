@@ -36,7 +36,7 @@ export function Header({ dark, onToggleTheme, onPick }: Props) {
           onBlur={() => window.setTimeout(() => setFocus(false), 150)}
           placeholder="Пошук: IEE, Гекслі, інтуїтивно…"
           aria-label="Пошук за соціотипом"
-          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-800"
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-base sm:text-sm dark:border-stone-600 dark:bg-stone-800"
         />
         {focus && q.trim() && (
           <ul className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-stone-200 bg-white shadow-lg dark:border-stone-600 dark:bg-stone-800">

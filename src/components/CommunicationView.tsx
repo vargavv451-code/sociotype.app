@@ -20,7 +20,7 @@ interface Props {
 }
 
 const selectCls =
-  'w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-900/40'
+  'w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-base sm:text-sm dark:border-stone-600 dark:bg-stone-900/40'
 
 export function CommunicationView({ typeCode, onTypeChange, fn, onFnChange }: Props) {
   const [reaction, setReaction] = usePersistentState<Reaction>('socio-comm-reaction', 'plus', (v) => v === 'plus' || v === 'minus')
@@ -190,7 +190,7 @@ export function CommunicationView({ typeCode, onTypeChange, fn, onFnChange }: Pr
           rows={5}
           maxLength={4000}
           placeholder="Наприклад: Дякую за ідею, мені дуже цікаво її розвинути. Але ти маєш негайно надати результати."
-          className="mt-3 w-full rounded-lg border border-stone-300 bg-white p-3 text-sm dark:border-stone-600 dark:bg-stone-900/40"
+          className="mt-3 w-full rounded-lg border border-stone-300 bg-white p-3 text-base sm:text-sm dark:border-stone-600 dark:bg-stone-900/40"
         />
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <button

@@ -7,6 +7,8 @@ import { DichotomyPicker } from './components/DichotomyPicker'
 import { Header } from './components/Header'
 import { ModelAView } from './components/ModelAView'
 import { ProfileView } from './components/ProfileView'
+import { SavedView } from './components/SavedView'
+import { useSaved } from './lib/saved'
 import { KalinauskasView } from './components/KalinauskasView'
 import { EmptyState, SourceLegend } from './components/ui'
 import { K_FUNCTIONS, KAL_CELLS, kModel } from './data/kal'
@@ -21,6 +23,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'profile', label: 'Профіль' },
   { id: 'triggers', label: 'Функції й реакції' },
   { id: 'comm', label: 'Комунікація' },
+  { id: 'saved', label: 'Збережені' },
   { id: 'model', label: 'Модель А (довідково)' },
   { id: 'about', label: 'Про довідник' },
 ]
@@ -47,6 +50,7 @@ export default function App() {
   const [dark, setDark] = useState<boolean>(readTheme)
 
   const type = findSociotype(dich)
+  const saved = useSaved()
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -152,8 +156,18 @@ export default function App() {
                 </button>
               ))}
               {type && (
-                <span className="ml-2 self-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
-                  {type.code} · {type.nickname}
+                <span className="ml-2 flex items-center gap-1 self-center">
+                  <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
+                    {type.code} · {type.nickname}
+                  </span>
+                  <button
+                    type="button"
+                    aria-pressed={saved.isSaved(type.code)}
+                    onClick={() => saved.toggle(type.code)}
+                    className="rounded-full border border-amber-400 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-50 dark:text-amber-200 dark:hover:bg-amber-950/30"
+                  >
+                    {saved.isSaved(type.code) ? '★ Збережено' : '☆ Зберегти'}
+                  </button>
                 </span>
               )}
             </div>
@@ -178,6 +192,16 @@ export default function App() {
             onTypeChange={(c) => setDich({ ...SOCIOTYPES[c].dichotomies })}
             fn={fn}
             onFnChange={setFn}
+          />
+        )}
+        {tab === 'saved' && (
+          <SavedView
+            items={saved.items}
+            current={type?.code ?? null}
+            onOpen={(c, t) => pickType(c, t)}
+            onNote={saved.setNote}
+            onRemove={saved.remove}
+            onPick={() => setTab('pick')}
           />
         )}
         {tab === 'about' && <AboutView onPick={(c) => pickType(c)} />}

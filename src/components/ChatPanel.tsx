@@ -79,7 +79,7 @@ export function ChatPanel({ context }: { context: string }) {
   return (
     <section
       aria-label="Чат із Claude"
-      className="fixed inset-x-2 bottom-2 z-40 flex max-h-[80vh] flex-col rounded-xl border border-stone-300 bg-white shadow-2xl sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-[26rem] dark:border-stone-600 dark:bg-stone-800"
+      className="fixed inset-x-2 bottom-2 z-40 flex max-h-[80dvh] max-w-[calc(100vw-1rem)] flex-col overflow-hidden rounded-xl border border-stone-300 bg-white shadow-2xl sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-[26rem] dark:border-stone-600 dark:bg-stone-800"
     >
       <header className="flex items-center justify-between gap-2 border-b border-stone-200 px-4 py-2.5 dark:border-stone-700">
         <h2 className="text-sm font-semibold">Уточнити в Claude</h2>
@@ -95,15 +95,15 @@ export function ChatPanel({ context }: { context: string }) {
         </div>
       </header>
 
-      <div className="min-h-[8rem] flex-1 space-y-3 overflow-y-auto px-4 py-3 text-sm" aria-live="polite">
+      <div className="min-h-[8rem] min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto px-4 py-3 text-sm" aria-live="polite">
         {msgs.length === 0 && (
           <p className="text-stone-500 dark:text-stone-400">
             Поставте уточнювальне питання. Claude бачить, який соціотип і розділ відкрито. Відповідь — від мовної моделі, вона може помилятися.
           </p>
         )}
         {msgs.map((m, i) => (
-          <div key={i} className={m.role === 'user' ? 'ml-8 rounded-lg bg-indigo-50 p-2.5 dark:bg-indigo-950/40' : 'mr-4 rounded-lg bg-stone-100 p-2.5 dark:bg-stone-900/40'}>
-            <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+          <div key={i} className={m.role === 'user' ? 'ml-6 min-w-0 break-words rounded-lg bg-indigo-50 p-2.5 dark:bg-indigo-950/40' : 'mr-2 min-w-0 break-words rounded-lg bg-stone-100 p-2.5 dark:bg-stone-900/40'}>
+            <p className="whitespace-pre-wrap break-words leading-relaxed [overflow-wrap:anywhere]">{m.content}</p>
             {m.role === 'assistant' && <SourceTag s="ШІ" />}
           </div>
         ))}
@@ -124,7 +124,7 @@ export function ChatPanel({ context }: { context: string }) {
           rows={2}
           maxLength={1500}
           placeholder="Ваше питання…"
-          className="min-w-0 flex-1 resize-none rounded-lg border border-stone-300 bg-white p-2 text-sm dark:border-stone-600 dark:bg-stone-900/40"
+          className="min-w-0 flex-1 resize-none rounded-lg border border-stone-300 bg-white p-2 text-base sm:text-sm dark:border-stone-600 dark:bg-stone-900/40"
         />
         <button type="submit" disabled={busy || !input.trim()} className="self-end rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40">
           Надіслати

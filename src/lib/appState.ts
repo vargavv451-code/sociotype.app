@@ -1,7 +1,7 @@
 import type { Dichotomies } from '../data/types'
 
-export type Tab = 'pick' | 'profile' | 'model' | 'triggers' | 'comm' | 'about'
-export const TAB_IDS: Tab[] = ['pick', 'profile', 'triggers', 'comm', 'model', 'about']
+export type Tab = 'pick' | 'profile' | 'model' | 'triggers' | 'comm' | 'saved' | 'about'
+export const TAB_IDS: Tab[] = ['pick', 'profile', 'triggers', 'comm', 'saved', 'model', 'about']
 
 export interface AppState {
   tab: Tab
