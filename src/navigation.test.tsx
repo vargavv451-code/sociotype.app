@@ -26,6 +26,17 @@ describe('збереження стану', () => {
     expect(screen.getAllByText('IEE').length).toBeGreaterThan(0)
   })
 
+  it('кнопка «← Назад» на сайті працює без кнопки браузера', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    expect(screen.queryByRole('button', { name: '← Назад' })).toBeNull()
+    await user.type(screen.getByLabelText('Пошук за соціотипом'), 'IEE')
+    await user.click(await screen.findByRole('button', { name: /IEE.*Гекслі/ }))
+    await user.click(screen.getByRole('tab', { name: 'Комунікація' }))
+    await user.click(screen.getByRole('button', { name: '← Назад' }))
+    await waitFor(() => expect(screen.getByText('Основні особливості мислення')).toBeTruthy())
+  })
+
   it('після «оновлення сторінки» відновлює тип і розділ з адреси', () => {
     history.replaceState(null, '', '/#tab=triggers&d=efnp&fn=2')
     render(<App />)

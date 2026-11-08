@@ -24,6 +24,12 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'about', label: 'Про довідник' },
 ]
 
+/** Глибина внутрішньої історії (скільки кроків можна повернутися назад). */
+function depthOf(): number {
+  const i = (history.state as { i?: number } | null)?.i
+  return typeof i === 'number' && i > 0 ? i : 0
+}
+
 function readTheme(): boolean {
   try {
     return localStorage.getItem('socio-theme') === 'dark'
@@ -53,6 +59,7 @@ export default function App() {
   // Стан живе в адресі (#tab=…&d=…&fn=…) і в localStorage: кнопка «Назад», оновлення сторінки й повторний візит нічого не скидають.
   const hash = stateToHash({ tab, dich, fn })
   const first = useRef(true)
+  const [depth, setDepth] = useState<number>(depthOf)
   useEffect(() => {
     saveState({ tab, dich, fn })
     const isFirst = first.current
@@ -60,13 +67,18 @@ export default function App() {
     if (location.hash !== hash) {
       // перехід між розділами додає запис в історію, дрібні зміни й перше завантаження — ні
       const sameTab = parseState(location.hash)?.tab === tab
-      if (isFirst || sameTab) history.replaceState(null, '', hash)
-      else history.pushState(null, '', hash)
+      if (isFirst || sameTab) history.replaceState({ i: depthOf() }, '', hash)
+      else {
+        const i = depthOf() + 1
+        history.pushState({ i }, '', hash)
+        setDepth(i)
+      }
     }
   }, [hash, tab, dich, fn])
 
   useEffect(() => {
     const onPop = () => {
+      setDepth(depthOf())
       const s = parseState(location.hash)
       if (!s) return
       if (s.tab) setTab(s.tab)
@@ -111,6 +123,15 @@ export default function App() {
           <Header dark={dark} onToggleTheme={() => setDark((d) => !d)} onPick={(c) => pickType(c)} />
           <nav aria-label="Розділи">
             <div className="flex flex-wrap gap-1" role="tablist">
+              {(tab !== 'pick' || depth > 0) && (
+                <button
+                  type="button"
+                  onClick={() => (depth > 0 ? history.back() : changeTab('pick'))}
+                  className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800"
+                >
+                  ← Назад
+                </button>
+              )}
               {TABS.map((t) => (
                 <button
                   key={t.id}
