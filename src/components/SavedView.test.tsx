@@ -31,3 +31,17 @@ describe('Збережені', () => {
     expect(screen.getByText(/Тут буде список збережених/)).toBeTruthy()
   })
 })
+
+describe('Вхід у «Збережені»', () => {
+  afterEach(cleanup)
+  beforeEach(() => { localStorage.clear(); sessionStorage.clear(); location.hash = '' })
+
+  it('показує форму входу без акаунта', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('tab', { name: 'Збережені' }))
+    expect(screen.getByLabelText('Логін')).toBeTruthy()
+    expect(screen.getByLabelText('Пароль')).toBeTruthy()
+    expect((screen.getByRole('button', { name: 'Увійти' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+})

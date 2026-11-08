@@ -16,6 +16,7 @@ export interface ChatBody {
 export interface KV {
   get(key: string): Promise<string | null>
   put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<void>
+  delete?(key: string): Promise<void>
 }
 
 export function parseChatBody(x: unknown): { ok: true; value: ChatBody } | { ok: false; error: string } {

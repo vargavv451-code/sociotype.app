@@ -2,6 +2,8 @@ import { onRequestPost as chat } from '../functions/api/chat'
 import { onRequestGet as ackGet, onRequestPost as ackPost } from '../functions/api/ack'
 import { onRequestPost as theses } from '../functions/api/theses'
 import { onRequestPost as event } from '../functions/api/event'
+import { onRequestPost as auth } from '../functions/api/auth'
+import { onRequestGet as savedGet, onRequestPut as savedPut } from '../functions/api/saved'
 import { onRequestGet as stats } from '../functions/api/stats'
 
 interface Env {
@@ -21,6 +23,9 @@ export default {
     if (pathname === '/api/theses' && request.method === 'POST') return theses(ctx)
     if (pathname === '/api/event' && request.method === 'POST') return event(ctx)
     if (pathname === '/api/stats' && request.method === 'GET') return stats(ctx)
+    if (pathname === '/api/auth' && request.method === 'POST') return auth(ctx)
+    if (pathname === '/api/saved' && request.method === 'GET') return savedGet(ctx)
+    if (pathname === '/api/saved' && request.method === 'PUT') return savedPut(ctx)
     if (pathname.startsWith('/api/')) return new Response('Not found', { status: 404 })
     return env.ASSETS.fetch(request)
   },

@@ -202,6 +202,11 @@ export default function App() {
             onNote={saved.setNote}
             onRemove={saved.remove}
             onPick={() => setTab('pick')}
+            account={saved.account}
+            status={saved.status}
+            error={saved.error}
+            onSignIn={saved.signIn}
+            onSignOut={saved.signOut}
           />
         )}
         {tab === 'about' && <AboutView onPick={(c) => pickType(c)} />}
