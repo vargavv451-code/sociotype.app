@@ -27,8 +27,8 @@ export function KalinauskasView({ type, fn, onChange }: Props) {
         <SourceTag s="Калінаускас" />
       </Card>
 
-      <div className="-mx-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Функції за Калінаускасом">
-        <div className="flex min-w-max gap-2">
+      <div role="tablist" aria-label="Функції за Калінаускасом">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {K_FUNCTION_IDS.map((f) => {
             const active = f === fn
             return (

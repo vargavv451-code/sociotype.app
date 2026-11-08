@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 import { ModelAView } from './components/ModelAView'
 import { KalinauskasView } from './components/KalinauskasView'
@@ -8,6 +8,11 @@ import { K_FUNCTION_IDS, KAL_CELLS, kModel } from './data/kal'
 import { ProfileView } from './components/ProfileView'
 import { SOCIOTYPES, TYPE_CODES } from './data/sociotypes'
 
+beforeEach(() => {
+  localStorage.clear()
+  sessionStorage.clear()
+  history.replaceState(null, '', '/')
+})
 afterEach(cleanup)
 
 describe('основний сценарій', () => {

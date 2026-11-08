@@ -58,18 +58,18 @@ export function ProfileView({ type, onOpenModel }: { type: Sociotype; onOpenMode
 
       <Card className="overflow-hidden p-0 sm:p-0">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
+          <table className="w-full table-fixed text-left text-sm sm:table-auto">
             <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:bg-stone-900/40 dark:text-stone-400">
               <tr>
-                <th className="w-1/3 px-4 py-2.5">Розділ</th>
-                <th className="px-4 py-2.5">Опис</th>
+                <th className="w-2/5 px-3 py-2.5 sm:w-1/3 sm:px-4">Розділ</th>
+                <th className="px-3 py-2.5 sm:px-4">Опис</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-200 dark:divide-stone-700">
               {rows.map(([k, v]) => (
                 <tr key={k} className="align-top">
-                  <th scope="row" className="px-4 py-3 font-medium">{k}</th>
-                  <td className="px-4 py-3 leading-relaxed text-stone-700 dark:text-stone-200">{v}</td>
+                  <th scope="row" className="break-words px-3 py-3 font-medium sm:px-4">{k}</th>
+                  <td className="break-words px-3 py-3 leading-relaxed sm:px-4 text-stone-700 dark:text-stone-200">{v}</td>
                 </tr>
               ))}
             </tbody>

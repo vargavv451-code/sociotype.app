@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ChatPanel } from './components/ChatPanel'
 import { AboutView } from './components/AboutView'
 import { CommunicationView } from './components/CommunicationView'
@@ -10,11 +10,10 @@ import { KalinauskasView } from './components/KalinauskasView'
 import { EmptyState, SourceLegend } from './components/ui'
 import { K_FUNCTIONS, KAL_CELLS, kModel } from './data/kal'
 import { SOCIOTYPES, findSociotype } from './data/sociotypes'
+import { loadState, parseState, saveState, stateToHash, type AppState, type Tab } from './lib/appState'
 import { track } from './lib/track'
 import type { KFunctionId } from './data/kal/cellTypes'
 import type { Dichotomies, TypeCode } from './data/types'
-
-type Tab = 'pick' | 'profile' | 'model' | 'triggers' | 'comm' | 'about'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'pick', label: 'Соціотип' },
@@ -34,9 +33,10 @@ function readTheme(): boolean {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('pick')
-  const [dich, setDich] = useState<Partial<Dichotomies>>({})
-  const [fn, setFn] = useState<KFunctionId>(1)
+  const [init] = useState<AppState>(loadState)
+  const [tab, setTab] = useState<Tab>(init.tab)
+  const [dich, setDich] = useState<Partial<Dichotomies>>(init.dich)
+  const [fn, setFn] = useState<KFunctionId>(init.fn)
   const [dark, setDark] = useState<boolean>(readTheme)
 
   const type = findSociotype(dich)
@@ -49,6 +49,33 @@ export default function App() {
       /* сховище недоступне — тема діє лише в межах сесії */
     }
   }, [dark])
+
+  // Стан живе в адресі (#tab=…&d=…&fn=…) і в localStorage: кнопка «Назад», оновлення сторінки й повторний візит нічого не скидають.
+  const hash = stateToHash({ tab, dich, fn })
+  const first = useRef(true)
+  useEffect(() => {
+    saveState({ tab, dich, fn })
+    const isFirst = first.current
+    first.current = false
+    if (location.hash !== hash) {
+      // перехід між розділами додає запис в історію, дрібні зміни й перше завантаження — ні
+      const sameTab = parseState(location.hash)?.tab === tab
+      if (isFirst || sameTab) history.replaceState(null, '', hash)
+      else history.pushState(null, '', hash)
+    }
+  }, [hash, tab, dich, fn])
+
+  useEffect(() => {
+    const onPop = () => {
+      const s = parseState(location.hash)
+      if (!s) return
+      if (s.tab) setTab(s.tab)
+      setDich(s.dich ?? {})
+      if (s.fn) setFn(s.fn)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   const typeCode = type?.code
   useEffect(() => {
@@ -82,8 +109,8 @@ export default function App() {
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/90 backdrop-blur dark:border-stone-700 dark:bg-stone-900/90">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-3">
           <Header dark={dark} onToggleTheme={() => setDark((d) => !d)} onPick={(c) => pickType(c)} />
-          <nav className="-mx-1 overflow-x-auto px-1" aria-label="Розділи">
-            <div className="flex min-w-max gap-1" role="tablist">
+          <nav aria-label="Розділи">
+            <div className="flex flex-wrap gap-1" role="tablist">
               {TABS.map((t) => (
                 <button
                   key={t.id}

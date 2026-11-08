@@ -69,16 +69,16 @@ export async function askClaude(opts: {
 }
 
 /** Ліміт запитів на IP за годину. Без KV ліміт не діє. */
-export async function checkRate(kv: KV | undefined, ip: string, limit: number, now = Date.now()): Promise<boolean> {
+export async function checkRate(kv: KV | undefined, ip: string, limit: number, now = Date.now(), prefix = 'rl'): Promise<boolean> {
   if (!kv) return true
-  const key = `rl:${ip}:${Math.floor(now / 3_600_000)}`
+  const key = `${prefix}:${ip}:${Math.floor(now / 3_600_000)}`
   const n = Number((await kv.get(key)) ?? '0')
   if (n >= limit) return false
   await kv.put(key, String(n + 1), { expirationTtl: 3700 })
   return true
 }
 
-export const EVENT_NAMES = ['tab', 'pick_type', 'function', 'analyze', 'chat'] as const
+export const EVENT_NAMES = ['tab', 'pick_type', 'function', 'analyze', 'chat', 'theses'] as const
 export type EventName = (typeof EVENT_NAMES)[number]
 
 export function sanitizeEvent(x: unknown): { name: EventName; props: Record<string, string> } | null {

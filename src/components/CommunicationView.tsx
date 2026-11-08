@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { CONTEXTS, CONTEXT_IDS } from '../data/contexts'
 import { CONTEXT_EXAMPLES } from '../data/contextExamples'
 import { ASPECTS } from '../data/aspects'
@@ -7,6 +7,8 @@ import type { KFunctionId } from '../data/kal/cellTypes'
 import { SOCIOTYPES, TYPE_CODES } from '../data/sociotypes'
 import type { ContextId, Reaction, TypeCode } from '../data/types'
 import { TONE_LABEL, analyzeMessage, type Verdict } from '../lib/analyzer'
+import { useContextTheses } from '../lib/contextTheses'
+import { usePersistentState } from '../lib/persist'
 import { track } from '../lib/track'
 import { Card, Chip, CopyButton, SourceTag, ThesisList } from './ui'
 
@@ -21,17 +23,20 @@ const selectCls =
   'w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-stone-900/40'
 
 export function CommunicationView({ typeCode, onTypeChange, fn, onFnChange }: Props) {
-  const [reaction, setReaction] = useState<Reaction>('plus')
-  const [context, setContext] = useState<ContextId>('acquaintance')
-  const [message, setMessage] = useState('')
-  const [submitted, setSubmitted] = useState('')
+  const [reaction, setReaction] = usePersistentState<Reaction>('socio-comm-reaction', 'plus', (v) => v === 'plus' || v === 'minus')
+  const [context, setContext] = usePersistentState<ContextId>('socio-comm-context', 'acquaintance', (v) => typeof v === 'string' && (CONTEXT_IDS as string[]).includes(v))
+  const [message, setMessage] = usePersistentState('socio-comm-message', '', (v) => typeof v === 'string')
+  const [submitted, setSubmitted] = usePersistentState('socio-comm-submitted', '', (v) => typeof v === 'string')
 
   const type = typeCode ? SOCIOTYPES[typeCode] : null
   const aspectCode = type ? kModel(type)[fn] : null
   const entry = aspectCode ? { aspect: ASPECTS[aspectCode], info: K_FUNCTIONS[fn], cell: KAL_CELLS[aspectCode][fn] } : null
   const ctx = CONTEXTS[context]
   const example = entry ? CONTEXT_EXAMPLES[entry.aspect.code][context] : null
-  const theses = entry ? entry.cell[reaction] : []
+  const baseTheses = entry ? entry.cell[reaction] : []
+  const ctxTheses = useContextTheses(aspectCode ? { aspect: aspectCode, fn, reaction, context } : null)
+  const contextual = ctxTheses.status === 'ok'
+  const theses = contextual ? ctxTheses.items : baseTheses
 
   const analysis = useMemo(() => (submitted ? analyzeMessage(submitted, type) : []), [submitted, type])
   const buckets = useMemo(() => {
@@ -155,11 +160,19 @@ export function CommunicationView({ typeCode, onTypeChange, fn, onFnChange }: Pr
           </div>
 
           <div className="mt-4 mb-2 flex items-center justify-between gap-2">
-            <h3 className="font-semibold">10 тез</h3>
+            <h3 className="font-semibold">10 тез{contextual ? ` для контексту «${ctx.name}»` : ''}</h3>
             <CopyButton text={theses.map((t, i) => `${i + 1}. ${t}`).join('\n')} label="Копіювати всі" />
           </div>
+          {ctxTheses.status === 'loading' && (
+            <p role="status" className="mb-2 text-xs text-stone-500 dark:text-stone-400">Складаю тези для контексту «{ctx.name}»… Поки що показано загальні.</p>
+          )}
+          {ctxTheses.status === 'error' && (
+            <p role="status" className="mb-2 text-xs text-amber-800 dark:text-amber-300">
+              Тези для контексту «{ctx.name}» недоступні ({ctxTheses.message}). Показано загальні тези для цієї функції.
+            </p>
+          )}
           <ThesisList items={theses} tone={reaction} />
-          <SourceTag s="Моє" />
+          <SourceTag s={contextual ? 'ШІ' : 'Моє'} />
         </Card>
       ) : (
         <Card className="text-center text-sm text-stone-600 dark:text-stone-300">Оберіть соціотип, щоб побачити тези для обраної функції.</Card>

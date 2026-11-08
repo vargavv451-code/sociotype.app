@@ -29,14 +29,14 @@ export function ModelAView({ type, onOpenKal }: Props) {
 
       <Card className="overflow-hidden p-0 sm:p-0">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full table-fixed text-left text-sm sm:table-auto">
             <thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:bg-stone-900/40 dark:text-stone-400">
               <tr>
-                <th className="px-3 py-2.5">№</th>
-                <th className="px-3 py-2.5">Функція</th>
-                <th className="px-3 py-2.5">Позиція</th>
-                <th className="px-3 py-2.5">Сила</th>
-                <th className="px-3 py-2.5">Значення</th>
+                <th className="w-9 px-2 py-2.5 sm:w-auto sm:px-3">№</th>
+                <th className="w-28 px-2 py-2.5 sm:w-auto sm:px-3">Функція</th>
+                <th className="px-2 py-2.5 sm:px-3">Позиція</th>
+                <th className="hidden px-3 py-2.5 sm:table-cell">Сила</th>
+                <th className="hidden px-3 py-2.5 sm:table-cell">Значення</th>
               </tr>
             </thead>
             <tbody>
@@ -49,8 +49,8 @@ export function ModelAView({ type, onOpenKal }: Props) {
                       className={`cursor-pointer border-t border-stone-200 transition hover:bg-indigo-50/60 dark:border-stone-700 dark:hover:bg-stone-700/50 ${isOpen ? 'bg-indigo-50 dark:bg-stone-700/60' : ''}`}
                       onClick={() => setOpen(isOpen ? null : pid)}
                     >
-                      <td className="px-3 py-3 font-semibold">{pid}</td>
-                      <td className="px-3 py-3">
+                      <td className="px-2 py-3 font-semibold sm:px-3">{pid}</td>
+                      <td className="px-2 py-3 sm:px-3">
                         <button
                           type="button"
                           aria-expanded={isOpen}
@@ -61,18 +61,22 @@ export function ModelAView({ type, onOpenKal }: Props) {
                         </button>
                         <div className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">{e.aspect.short}</div>
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-2 py-3 sm:px-3">
                         <div className="font-medium">{e.position.name}</div>
                         <div className="text-xs text-stone-500 dark:text-stone-400">{e.position.block}</div>
+                        <div className="mt-1 sm:hidden">
+                          <Chip tone={e.position.strength === 'Сильна' ? 'plus' : 'neutral'}>{e.position.strength}</Chip>
+                        </div>
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="hidden px-3 py-3 sm:table-cell">
                         <Chip tone={e.position.strength === 'Сильна' ? 'plus' : 'neutral'}>{e.position.strength}</Chip>
                       </td>
-                      <td className="px-3 py-3 text-stone-700 dark:text-stone-200">{e.position.summary}</td>
+                      <td className="hidden px-3 py-3 text-stone-700 dark:text-stone-200 sm:table-cell">{e.position.summary}</td>
                     </tr>
                     {isOpen && (
                       <tr className="bg-indigo-50/40 dark:bg-stone-900/30">
                         <td colSpan={5} className="px-4 py-4">
+                          <p className="mb-3 text-sm font-medium sm:hidden">{e.position.summary}</p>
                           <div className="grid gap-4 md:grid-cols-2">
                             <div>
                               <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Аспект</h4>

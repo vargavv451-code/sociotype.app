@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { usePersistentState } from '../lib/persist'
 import { track } from '../lib/track'
 import { SourceTag } from './ui'
 
@@ -34,7 +35,7 @@ export async function sendChat(messages: Msg[], context: string, fetchFn: typeof
 
 export function ChatPanel({ context }: { context: string }) {
   const [open, setOpen] = useState(false)
-  const [msgs, setMsgs] = useState<Msg[]>([])
+  const [msgs, setMsgs] = usePersistentState<Msg[]>('socio-chat', [], (v) => Array.isArray(v))
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
