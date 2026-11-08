@@ -10,6 +10,11 @@ export type ThesesState =
 
 const memo = new Map<string, string[]>()
 
+/** Для тестів: скинути кеш у пам’яті сторінки. */
+export function clearContextThesesCache() {
+  memo.clear()
+}
+
 export async function fetchContextTheses(
   req: { aspect: AspectCode; fn: KFunctionId; reaction: Reaction; context: ContextId },
   fetchFn: typeof fetch = fetch,

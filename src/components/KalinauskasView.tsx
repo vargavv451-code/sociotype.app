@@ -1,7 +1,11 @@
 import { ASPECTS } from '../data/aspects'
+import { CONTEXTS, CONTEXT_IDS } from '../data/contexts'
+import { CONTEXT_EXAMPLES } from '../data/contextExamples'
 import { K_FUNCTIONS, K_FUNCTION_IDS, KAL_CELLS, elementKind, kModel } from '../data/kal'
 import type { KFunctionId } from '../data/kal/cellTypes'
-import type { Sociotype } from '../data/types'
+import type { ContextId, Sociotype } from '../data/types'
+import { useContextTheses } from '../lib/contextTheses'
+import { usePersistentState } from '../lib/persist'
 import { Card, Chip, CopyButton, SourceTag, ThesisList } from './ui'
 
 interface Props {
@@ -15,6 +19,24 @@ export function KalinauskasView({ type, fn, onChange }: Props) {
   const aspect = ASPECTS[model[fn]]
   const info = K_FUNCTIONS[fn]
   const cell = KAL_CELLS[aspect.code][fn]
+
+  const [ctx, setCtx] = usePersistentState<ContextId | 'general'>(
+    'socio-kal-context',
+    'general',
+    (v) => v === 'general' || (typeof v === 'string' && (CONTEXT_IDS as string[]).includes(v)),
+  )
+  const real = ctx === 'general' ? null : ctx
+  const plusState = useContextTheses(real ? { aspect: aspect.code, fn, reaction: 'plus', context: real } : null)
+  const minusState = useContextTheses(real ? { aspect: aspect.code, fn, reaction: 'minus', context: real } : null)
+  const plusItems = plusState.status === 'ok' ? plusState.items : cell.plus
+  const minusItems = minusState.status === 'ok' ? minusState.items : cell.minus
+  const example = real ? CONTEXT_EXAMPLES[aspect.code][real] : null
+  const note = (st: typeof plusState) =>
+    !real ? null : st.status === 'loading' ? (
+      <p role="status" className="mb-2 text-xs text-stone-500 dark:text-stone-400">Складаю тези для контексту «{CONTEXTS[real].name}»… Поки що показано загальні.</p>
+    ) : st.status === 'error' ? (
+      <p role="status" className="mb-2 text-xs text-amber-800 dark:text-amber-300">Тези для контексту «{CONTEXTS[real].name}» недоступні ({st.message}). Показано загальні.</p>
+    ) : null
 
   return (
     <div className="space-y-4">
@@ -83,22 +105,47 @@ export function KalinauskasView({ type, fn, onChange }: Props) {
         </p>
       </Card>
 
+      <Card>
+        <div className="mb-2 text-sm font-medium">Контекст спілкування</div>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Контекст спілкування">
+          {(['general', ...CONTEXT_IDS] as const).map((c) => (
+            <button
+              key={c}
+              type="button"
+              aria-pressed={ctx === c}
+              onClick={() => setCtx(c)}
+              className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                ctx === c
+                  ? 'border-indigo-600 bg-indigo-600 text-white'
+                  : 'border-stone-300 bg-white hover:border-indigo-400 dark:border-stone-600 dark:bg-stone-900/40'
+              }`}
+            >
+              {c === 'general' ? 'Загальні' : CONTEXTS[c].name}
+            </button>
+          ))}
+        </div>
+      </Card>
+
       <div className="grid gap-5 lg:grid-cols-2">
         <section aria-label="Тези плюс" className="rounded-xl border border-emerald-300 bg-emerald-50/60 p-4 dark:border-emerald-800 dark:bg-emerald-950/20">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h3 className="text-base font-semibold text-emerald-800 dark:text-emerald-300">ПЛЮС (+) · 10 тез</h3>
-            <CopyButton text={cell.plus.map((t, i) => `${i + 1}. ${t}`).join('\n')} label="Копіювати всі" />
+            <CopyButton text={plusItems.map((t, i) => `${i + 1}. ${t}`).join('\n')} label="Копіювати всі" />
           </div>
-          <ThesisList items={cell.plus} tone="plus" />
-          <SourceTag s="Моє" />
+          {note(plusState)}
+          {example && <p className="mb-2 rounded-lg bg-white/70 p-2.5 text-sm dark:bg-stone-900/30"><span className="font-medium">Приклад: </span>{example.plus}</p>}
+          <ThesisList items={plusItems} tone="plus" />
+          <SourceTag s={real && plusState.status === 'ok' ? 'ШІ' : 'Моє'} />
         </section>
         <section aria-label="Тези мінус" className="rounded-xl border border-rose-300 bg-rose-50/60 p-4 dark:border-rose-800 dark:bg-rose-950/20">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h3 className="text-base font-semibold text-rose-800 dark:text-rose-300">МІНУС (−) · 10 тез</h3>
-            <CopyButton text={cell.minus.map((t, i) => `${i + 1}. ${t}`).join('\n')} label="Копіювати всі" />
+            <CopyButton text={minusItems.map((t, i) => `${i + 1}. ${t}`).join('\n')} label="Копіювати всі" />
           </div>
-          <ThesisList items={cell.minus} tone="minus" />
-          <SourceTag s="Моє" />
+          {note(minusState)}
+          {example && <p className="mb-2 rounded-lg bg-white/70 p-2.5 text-sm dark:bg-stone-900/30"><span className="font-medium">Приклад: </span>{example.minus}</p>}
+          <ThesisList items={minusItems} tone="minus" />
+          <SourceTag s={real && minusState.status === 'ok' ? 'ШІ' : 'Моє'} />
         </section>
       </div>
 

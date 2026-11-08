@@ -2,10 +2,12 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { clearContextThesesCache } from './lib/contextTheses'
 
 const ten = (tag: string) => Array.from({ length: 10 }, (_, i) => `${tag}: теза ${i + 1}`)
 
 beforeEach(() => {
+  clearContextThesesCache()
   localStorage.clear()
   sessionStorage.clear()
   history.replaceState(null, '', '/')
@@ -69,5 +71,25 @@ describe('тези під контекст', () => {
     await user.click(screen.getByRole('button', { name: 'Побачення' }))
     expect(await screen.findByText(/Показано загальні тези/)).toBeTruthy()
     expect(document.querySelectorAll('ol li').length).toBe(10)
+  })
+})
+
+describe('контекст у розділі «Функції й реакції»', () => {
+  it('є вибір контексту, і тези змінюються під контекст', async () => {
+    history.replaceState(null, '', '/#tab=triggers&d=efnp&fn=1')
+    const f = vi.fn(async (_u: string, init?: RequestInit) => {
+      const b = JSON.parse(String(init?.body))
+      return new Response(JSON.stringify({ theses: ten(`${b.reaction}-${b.context}`) }), { status: 200 })
+    })
+    vi.stubGlobal('fetch', f)
+    const user = userEvent.setup()
+    render(<App />)
+    expect(screen.getByRole('button', { name: 'Загальні', pressed: true })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Знайомство' }))
+    expect(await screen.findByText('plus-acquaintance: теза 1')).toBeTruthy()
+    expect(await screen.findByText('minus-acquaintance: теза 1')).toBeTruthy()
+    expect(screen.getAllByText(/Приклад:/).length).toBe(2)
+    await user.click(screen.getByRole('button', { name: 'Загальні' }))
+    expect(screen.queryByText('plus-acquaintance: теза 1')).toBeNull()
   })
 })
