@@ -46,7 +46,8 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         apiKey: env.ANTHROPIC_API_KEY,
         model: env.CHAT_MODEL || 'claude-sonnet-5-5',
         system: THESES_SYSTEM,
-        maxTokens: 8000,
+        maxTokens: 2500,
+        noThinking: true,
         messages: [{ role: 'user', content: buildThesesUser(req) }],
       })
       theses = parseTheses(text)

@@ -55,15 +55,25 @@ export async function askClaude(opts: {
   system: string
   messages: ChatMsg[]
   maxTokens?: number
+  noThinking?: boolean
   fetchFn?: typeof fetch
 }): Promise<string> {
   const f = opts.fetchFn ?? fetch
   const res = await f('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-key': opts.apiKey, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: opts.model, max_tokens: opts.maxTokens ?? 4000, system: opts.system, messages: opts.messages }),
+    body: JSON.stringify({
+      model: opts.model,
+      max_tokens: opts.maxTokens ?? 4000,
+      system: opts.system,
+      messages: opts.messages,
+      ...(opts.noThinking ? { thinking: { type: 'disabled' } } : {}),
+    }),
   })
-  if (!res.ok) throw new Error(`Anthropic API: ${res.status}`)
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => '')).slice(0, 160)
+    throw new Error(`Anthropic API: ${res.status} ${detail}`.trim())
+  }
   const data = (await res.json()) as { content?: { type: string; text?: string }[]; stop_reason?: string }
   const text = (data.content ?? []).filter((c) => c.type === 'text').map((c) => c.text ?? '').join('\n').trim()
   if (!text) throw new Error(`Порожня відповідь, причина зупинки: ${data.stop_reason ?? 'невідома'}`)
