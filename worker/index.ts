@@ -12,7 +12,7 @@ interface Env {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url)
-    const ctx = { request, env }
+    const ctx = { request, env: env as never }
     if (pathname === '/api/chat' && request.method === 'POST') return chat(ctx)
     if (pathname === '/api/event' && request.method === 'POST') return event(ctx)
     if (pathname === '/api/stats' && request.method === 'GET') return stats(ctx)
