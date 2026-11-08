@@ -1,0 +1,8 @@
+name = "sociotype"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "dist"
+
+# Після створення KV-сховища (див. README) розкоментуйте й вставте його id:
+# [[kv_namespaces]]
+# binding = "USAGE"
+# id = "ВАШ_KV_ID"
