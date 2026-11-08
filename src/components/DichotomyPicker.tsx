@@ -4,15 +4,15 @@ import { Card, Chip, SourceTag, type Source } from './ui'
 
 type Key = keyof Dichotomies
 
-const ROWS: { key: Key; title: string; options: [string, string]; hint: string; source: Source }[] = [
+const ROWS: { key: Key; title: string; options: [string, string]; hints: [string, string]; source: Source }[] = [
   { key: 'ei', title: '1. Екстраверсія / інтроверсія', options: ['extravert', 'introvert'],
-    hint: 'Це належність до типу, а не поточний стан: екстраверт може тимчасово поводитися як інтроверт, і навпаки.', source: 'Калінаускас' },
+    hints: ['Іде в контакт першим, говорить вголос, енергію бере від людей і дій.', 'Спершу обдумує, говорить стримано, енергію бере від тиші й свого простору.'], source: 'Моє' },
   { key: 'lf', title: '2. Логіка / етика', options: ['logic', 'ethic'],
-    hint: 'Логіка — про порядок і зв’язки між об’єктами, етика — про мислення, кероване почуттям.', source: 'Калінаускас' },
+    hints: ['Оцінює за фактами, логікою й порядком.', 'Оцінює за ставленням, емоціями й атмосферою між людьми.'], source: 'Моє' },
   { key: 'sn', title: '3. Сенсорика / інтуїція', options: ['sensing', 'intuition'],
-    hint: 'Сенсорики живуть відчуттями й точно відчувають своє фізичне «Я», а інтуїти мають передбачення.', source: 'Аугустінавічюте' },
+    hints: ['Спирається на відчуття, речі й конкретний досвід «тут і зараз».', 'Спирається на ідеї, передчуття й можливі наслідки.'], source: 'Моє' },
   { key: 'rp', title: '4. Раціональність / ірраціональність', options: ['rational', 'irrational'],
-    hint: 'Раціонал — той, у кого базова функція є судженням (логіка чи етика), ірраціонал — той, у кого вона є сприйняттям (сенсорика чи інтуїція).', source: 'Вікіпедія' },
+    hints: ['Планує, ухвалює рішення й закриває питання.', 'Діє за обставинами й залишає варіанти відкритими.'], source: 'Моє' },
 ]
 
 interface Props {
@@ -64,7 +64,10 @@ export function DichotomyPicker({ value, onChange, onOpenProfile }: Props) {
                   )
                 })}
               </div>
-              <p className="mt-1.5 text-xs leading-snug text-stone-600 dark:text-stone-300">{row.hint}</p>
+              <div className="mt-1.5 grid grid-cols-2 gap-2 text-xs leading-snug text-stone-600 dark:text-stone-300">
+                <p>{row.hints[0]}</p>
+                <p>{row.hints[1]}</p>
+              </div>
               <SourceTag s={row.source} className="!mt-0.5" />
             </div>
           ))}
