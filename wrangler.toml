@@ -1,8 +1,16 @@
-name = "sociotype"
+name = "sociotype-app"
+main = "worker/index.ts"
 compatibility_date = "2026-01-01"
-pages_build_output_dir = "dist"
 
-# Після створення KV-сховища (див. README) розкоментуйте й вставте його id:
-# [[kv_namespaces]]
-# binding = "USAGE"
-# id = "ВАШ_KV_ID"
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Сховище статистики. Cloudflare створить його сам під час деплою (потрібен свіжий wrangler).
+[[kv_namespaces]]
+binding = "USAGE"
+
+[vars]
+CHAT_LIMIT = "20"

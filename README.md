@@ -44,24 +44,20 @@ npm test         # перевірки даних, аналізатора й ін
 Працює в браузері на правилах (ключові слова й тон), без мовної моделі й без запитів на сервер, тому секретних ключів немає.
 Це евристика: вона не розуміє іронії та контексту. Числових оцінок вона не видає.
 
-## Розгортання: GitHub + Cloudflare Pages (з чатом і статистикою)
+## Розгортання: GitHub + Cloudflare (Workers зі статичними файлами; чат і статистика)
 
-Сайт — статична збірка (`dist/`) плюс три серверні функції в `functions/api/`: `chat` (чат із Claude), `event` (анонімні події), `stats` (підсумок подій).
-Ключ API ніколи не потрапляє в код сайту: він зберігається як секрет у Cloudflare.
+Сайт — статична збірка (`dist/`) плюс серверний код у `worker/index.ts`, який використовує `functions/api/`: `chat` (чат із Claude), `event` (анонімні події), `stats` (підсумок подій).
+Ключ API не потрапляє в код сайту: він зберігається як секрет у Cloudflare.
 
-1. **GitHub.** Створіть порожній репозиторій і завантажте в нього вміст проєкту (без `node_modules` і `dist`, вони в `.gitignore`):
-   `git init && git add . && git commit -m "init" && git branch -M main && git remote add origin <URL> && git push -u origin main`.
-2. **Cloudflare Pages.** Dashboard → Workers & Pages → Create → Pages → Connect to Git → оберіть репозиторій.
-   Build command: `npm run build`, output directory: `dist`. Після першого збирання сайт буде на `*.pages.dev`.
-3. **Ключ API.** Створіть ключ на console.anthropic.com. У проєкті Pages: Settings → Variables and Secrets → додайте секрет `ANTHROPIC_API_KEY`.
-   У Anthropic Console задайте місячний ліміт витрат — це головний захист від зайвих витрат.
-4. **Сховище статистики.** Storage & Databases → KV → Create namespace (наприклад, `sociotype-usage`). У проєкті Pages: Settings → Bindings → KV namespace,
-   variable name `USAGE`. Без нього чат працює, але ліміт запитів і статистика не діють.
-5. **Токен статистики.** Додайте змінну `STATS_TOKEN` (довгий випадковий рядок). Підсумок: `https://ВАШ-САЙТ/api/stats?token=ВАШ_ТОКЕН`.
-6. **Домен.** Домен має бути в Cloudflare (купити в Cloudflare Registrar або змінити NS у реєстратора). У проєкті Pages: Custom domains → Set up a domain.
-7. Після змін змінних зробіть новий деплой (Deployments → Retry deployment).
+1. **GitHub.** Код у репозиторії; після кожного `git push` у `main` Cloudflare збирає й публікує сайт сам.
+2. **Cloudflare.** Compute → Workers & Pages → Create application → Import a repository. Build command: `npm run build`, deploy command: `npx wrangler deploy` (значення за замовчуванням).
+3. **Ключ API.** Створіть ключ на console.anthropic.com і додайте в проєкті: Settings → Variables and Secrets → тип Secret, назва `ANTHROPIC_API_KEY`. У Console задайте місячний ліміт витрат.
+4. **Токен статистики.** Там само додайте Secret `STATS_TOKEN` (довгий випадковий рядок). Підсумок: `https://ВАШ-САЙТ/api/stats?token=ВАШ_ТОКЕН`.
+5. **Сховище KV `USAGE`** створюється автоматично з `wrangler.toml`. Якщо деплой скаржиться на KV, створіть сховище вручну (Storage & databases → KV) і впишіть його `id` у `wrangler.toml`.
+6. **Домен.** У проєкті: Settings → Domains & Routes → Add → Custom domain (домен має бути в Cloudflare).
+7. Секрети діють після наступного деплою (Deployments → Retry або новий `git push`).
 
-Необов'язкові змінні: `CHAT_MODEL` (за замовчуванням `claude-sonnet-5-5`), `CHAT_LIMIT` (запитів на IP за годину, 20), `LOG_QUESTIONS=true` (зберігати текст питань у чаті; за замовчуванням зберігається лише довжина).
+Необов'язкові змінні: `CHAT_MODEL` (за замовчуванням `claude-sonnet-5-5`), `CHAT_LIMIT` (запитів на IP за годину, 20), `LOG_QUESTIONS=true` (зберігати текст питань у чаті; за замовчуванням лише довжина).
 
-Що збирається: назви розділів, обрані типи й функції, факт запуску аналізу та чату. Тексти повідомлень для аналізу не надсилаються нікуди.
-У локальному режимі (`npm run dev`) чат і статистика не працюють: функцій немає.
+Що збирається: назви розділів, обрані типи й функції, факт запуску аналізу та чату. Тексти повідомлень для аналізу нікуди не надсилаються.
+У локальному режимі (`npm run dev`) чат і статистика не працюють. Для перевірки з функціями: `npm run build && npx wrangler dev`.
