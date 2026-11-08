@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChatPanel } from './components/ChatPanel'
+import { DISCLAIMER_TEXT, DisclaimerBar, DisclaimerGate } from './components/Disclaimer'
 import { AboutView } from './components/AboutView'
 import { CommunicationView } from './components/CommunicationView'
 import { DichotomyPicker } from './components/DichotomyPicker'
@@ -118,6 +119,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-900 dark:text-stone-100">
+      <DisclaimerGate />
+      <DisclaimerBar />
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/90 backdrop-blur dark:border-stone-700 dark:bg-stone-900/90">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-3">
           <Header dark={dark} onToggleTheme={() => setDark((d) => !d)} onPick={(c) => pickType(c)} />
@@ -185,7 +188,7 @@ export default function App() {
           <summary className="cursor-pointer font-medium">Що означають позначки «Джерело»</summary>
           <div className="mt-2"><SourceLegend /></div>
         </details>
-        Довідник працює за логікою Калінаускаса й описує соціоніку як модель інтерпретації. Він не є психологічною діагностикою й не передбачає реакцію конкретної людини.
+        <p>{DISCLAIMER_TEXT} Довідник працює за логікою Калінаускаса й описує соціоніку як модель інтерпретації. Він не є психологічною діагностикою й не передбачає реакцію конкретної людини.</p>
       </footer>
       <ChatPanel context={chatContext} />
     </div>
