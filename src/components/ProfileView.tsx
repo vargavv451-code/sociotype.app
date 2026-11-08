@@ -1,4 +1,7 @@
 import { PROFILES } from '../data/profiles'
+import { K_FUNCTIONS, K_FUNCTION_IDS, kModel } from '../data/kal'
+import { K_TYPE_DESCRIPTIONS } from '../data/kal/typeDesc'
+import { SOCIOTYPES } from '../data/sociotypes'
 import { DICHOTOMY_LABELS, QUADRAS } from '../data/sociotypes'
 import type { Sociotype } from '../data/types'
 import { Card, Chip, SourceTag } from './ui'
@@ -6,6 +9,7 @@ import { Card, Chip, SourceTag } from './ui'
 export function ProfileView({ type, onOpenModel }: { type: Sociotype; onOpenModel: () => void }) {
   const p = PROFILES[type.code]
   const d = type.dichotomies
+  const kDesc = K_TYPE_DESCRIPTIONS[type.code]
 
   const rows: [string, string][] = [
     ['Основні особливості мислення', p.thinking],
@@ -38,6 +42,35 @@ export function ProfileView({ type, onOpenModel }: { type: Sociotype; onOpenMode
         </p>
         <SourceTag s="Аугустінавічюте" />
       </Card>
+
+      {kDesc && (
+        <Card>
+          <h3 className="font-semibold">Опис типу за Калінаускасом</h3>
+          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">
+            Переказ опису типу з книги по чотирьох функціях. Книга описує тип разом із типом-партнером ({SOCIOTYPES[kDesc.pair].nickname}): коли опис функції в ній спільний для обох, це позначено.
+          </p>
+          {kDesc.intro && <p className="mt-2 text-sm">{kDesc.intro}</p>}
+          <ol className="mt-3 space-y-3">
+            {K_FUNCTION_IDS.map((f) => (
+              <li key={f} className="rounded-lg border border-stone-200 p-3 dark:border-stone-700">
+                <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                  <span>{f}-а функція · {K_FUNCTIONS[f].name}</span>
+                  <span className="rounded-md bg-indigo-600 px-1.5 py-0.5 font-mono text-xs font-bold text-white">{kModel(type)[f]}</span>
+                  {kDesc.fn[f].shared && <Chip>спільне з типом {SOCIOTYPES[kDesc.pair].nickname}</Chip>}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed">{kDesc.fn[f].text}</p>
+                {kDesc.fn[f].caveat && (
+                  <p className="mt-2 rounded-md bg-amber-50 p-2 text-xs leading-relaxed text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+                    Розбіжність у джерелі: {kDesc.fn[f].caveat}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ol>
+          {kDesc.note && <p className="mt-3 text-sm">{kDesc.note}</p>}
+          <SourceTag s="Калінаускас" />
+        </Card>
+      )}
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card>
