@@ -1,14 +1,18 @@
 import { DICHOTOMY_LABELS, QUADRAS, findSociotype } from '../data/sociotypes'
 import type { Dichotomies } from '../data/types'
-import { Card, Chip, SourceTag } from './ui'
+import { Card, Chip, SourceTag, type Source } from './ui'
 
 type Key = keyof Dichotomies
 
-const ROWS: { key: Key; title: string; options: [string, string] }[] = [
-  { key: 'ei', title: '1. Екстраверсія / інтроверсія', options: ['extravert', 'introvert'] },
-  { key: 'lf', title: '2. Логіка / етика', options: ['logic', 'ethic'] },
-  { key: 'sn', title: '3. Сенсорика / інтуїція', options: ['sensing', 'intuition'] },
-  { key: 'rp', title: '4. Раціональність / ірраціональність', options: ['rational', 'irrational'] },
+const ROWS: { key: Key; title: string; options: [string, string]; hint: string; source: Source }[] = [
+  { key: 'ei', title: '1. Екстраверсія / інтроверсія', options: ['extravert', 'introvert'],
+    hint: 'Це належність до типу, а не поточний стан: екстраверт може тимчасово поводитися як інтроверт, і навпаки.', source: 'Калінаускас' },
+  { key: 'lf', title: '2. Логіка / етика', options: ['logic', 'ethic'],
+    hint: 'Логіка — про порядок і зв’язки між об’єктами, етика — про мислення, кероване почуттям.', source: 'Калінаускас' },
+  { key: 'sn', title: '3. Сенсорика / інтуїція', options: ['sensing', 'intuition'],
+    hint: 'Сенсорики живуть відчуттями й точно відчувають своє фізичне «Я», а інтуїти мають передбачення.', source: 'Аугустінавічюте' },
+  { key: 'rp', title: '4. Раціональність / ірраціональність', options: ['rational', 'irrational'],
+    hint: 'Раціонал — той, у кого базова функція є судженням (логіка чи етика), ірраціонал — той, у кого вона є сприйняттям (сенсорика чи інтуїція).', source: 'Вікіпедія' },
 ]
 
 interface Props {
@@ -60,6 +64,8 @@ export function DichotomyPicker({ value, onChange, onOpenProfile }: Props) {
                   )
                 })}
               </div>
+              <p className="mt-1.5 text-xs leading-snug text-stone-600 dark:text-stone-300">{row.hint}</p>
+              <SourceTag s={row.source} className="!mt-0.5" />
             </div>
           ))}
         </div>
